@@ -131,7 +131,7 @@ spring:
         connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
       datasource:
         master:
-          url: jdbc:postgresql://192.168.42.136:5432/sms-quality
+          url: jdbc:postgresql://10.76.14.111:5432/sms-quality
           username: postgres
           password: postgres
           driver-class-name: org.postgresql.Driver
@@ -144,7 +144,7 @@ spring:
   #redis 配置
   redis:
     database: 10
-    host: 192.168.42.136
+    host: 10.76.14.111
     port: 6379
     password: ''
 #mybatis plus 设置
