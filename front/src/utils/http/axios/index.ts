@@ -90,6 +90,10 @@ const transform: AxiosTransform = {
 
   // 请求之前处理config
   beforeRequestHook: (config, options) => {
+
+    console.log('1 - url: ' + JSON.stringify(config.url))
+    console.log('1 - params: ' + JSON.stringify(config.params))
+
     const { apiUrl, joinPrefix, joinParamsToUrl, formatDate, joinTime = true, urlPrefix } = options;
 
     if (joinPrefix) {
@@ -102,6 +106,7 @@ const transform: AxiosTransform = {
     const params = config.params || {};
     const data = config.data || false;
     formatDate && data && !isString(data) && formatRequestDate(data);
+
     if (config.method?.toUpperCase() === RequestEnum.GET) {
       if (!isString(params)) {
         // 给 get 请求加上时间戳参数，避免从缓存中拿数据。
@@ -165,7 +170,7 @@ const transform: AxiosTransform = {
 
       // ========================================================================================
       // update-begin--author:sunjianlei---date:20220624--for: 添加低代码应用ID
-      let routeParams = router.currentRoute.value.params;
+      const routeParams = router.currentRoute.value.params;
       if (routeParams.appId) {
         config.headers[ConfigEnum.X_LOW_APP_ID] = routeParams.appId;
         // lowApp自定义筛选条件
@@ -176,7 +181,6 @@ const transform: AxiosTransform = {
       }
       // update-end--author:sunjianlei---date:20220624--for: 添加低代码应用ID
       // ========================================================================================
-
     }
     return config;
   },
@@ -288,6 +292,7 @@ function createQualityAxios(opt?: Partial<CreateAxiosOptions>) {
         baseURL: import.meta.env.VITE_GLOB_SMS_QUALITY_API_URL,
         timeout: 10 * 1000,
         headers: { 'Content-Type': ContentTypeEnum.JSON },
+        transform,
         requestOptions: {
           joinPrefix: false,
           isReturnNativeResponse: false,

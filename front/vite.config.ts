@@ -1,5 +1,7 @@
 import type { UserConfig, ConfigEnv } from 'vite';
+// @ts-ignore
 import pkg from './package.json';
+// @ts-ignore
 import dayjs from 'dayjs';
 import { loadEnv } from 'vite';
 import { resolve } from 'path';
@@ -19,10 +21,7 @@ const __APP_INFO__ = {
   lastBuildTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
 };
 
-
-
 export default ({ command, mode }: ConfigEnv): UserConfig => {
-
   const root = process.cwd();
 
   const env = loadEnv(mode, root);
@@ -103,13 +102,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
         target: 'es2020',
       },
       // @iconify/iconify: The dependency is dynamically and virtually loaded by @purge-icons/generated, so it needs to be specified explicitly
-      include: [
-        '@vue/runtime-core',
-        '@vue/shared',
-        '@iconify/iconify',
-        'ant-design-vue/es/locale/zh_CN',
-        'ant-design-vue/es/locale/en_US',
-      ],
+      include: ['@vue/runtime-core', '@vue/shared', '@iconify/iconify', 'ant-design-vue/es/locale/zh_CN', 'ant-design-vue/es/locale/en_US'],
     },
   };
 };

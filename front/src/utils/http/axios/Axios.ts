@@ -2,6 +2,7 @@ import type { AxiosRequestConfig, AxiosInstance, AxiosResponse, AxiosError } fro
 import type { RequestOptions, Result, UploadFileParams, UploadFileCallBack } from '/#/axios';
 import type { CreateAxiosOptions } from './axiosTransform';
 import axios from 'axios';
+// @ts-ignore
 import qs from 'qs';
 import { AxiosCanceler } from './axiosCancel';
 import { isFunction } from '/@/utils/is';
@@ -249,7 +250,6 @@ export class VAxios {
     });
   }
 
-
   /**
    * 【用于评论功能】自定义文件上传-请求
    * @param url
@@ -257,16 +257,15 @@ export class VAxios {
    */
   uploadMyFile<T = any>(url, formData) {
     const glob = useGlobSetting();
-    return this.axiosInstance
-      .request<T>({
-        url: url,
-        baseURL: glob.uploadUrl,
-        method: 'POST',
-        data: formData,
-        headers: {
-          'Content-type': ContentTypeEnum.FORM_DATA,
-          ignoreCancelToken: true,
-        },
-      });
+    return this.axiosInstance.request<T>({
+      url: url,
+      baseURL: glob.uploadUrl,
+      method: 'POST',
+      data: formData,
+      headers: {
+        'Content-type': ContentTypeEnum.FORM_DATA,
+        ignoreCancelToken: true,
+      },
+    });
   }
 }

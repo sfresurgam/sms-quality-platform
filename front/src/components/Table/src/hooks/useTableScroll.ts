@@ -1,12 +1,12 @@
-import type {BasicTableProps, TableRowSelection, BasicColumn} from '../types/table';
-import type {Ref, ComputedRef} from 'vue';
-import {computed, unref, ref, nextTick, watch} from 'vue';
-import {getViewportOffset} from '/@/utils/domUtils';
-import {isBoolean} from '/@/utils/is';
-import {useWindowSizeFn} from '/@/hooks/event/useWindowSizeFn';
-import {useModalContext} from '/@/components/Modal';
-import {onMountedOrActivated} from '/@/hooks/core/onMountedOrActivated';
-import {useDebounceFn} from '@vueuse/core';
+import type { BasicTableProps, TableRowSelection, BasicColumn } from '../types/table';
+import type { Ref, ComputedRef } from 'vue';
+import { computed, unref, ref, nextTick, watch } from 'vue';
+import { getViewportOffset } from '/@/utils/domUtils';
+import { isBoolean } from '/@/utils/is';
+import { useWindowSizeFn } from '/@/hooks/event/useWindowSizeFn';
+import { useModalContext } from '/@/components/Modal';
+import { onMountedOrActivated } from '/@/hooks/core/onMountedOrActivated';
+import { useDebounceFn } from '@vueuse/core';
 
 export function useTableScroll(
   propsRef: ComputedRef<BasicTableProps>,
@@ -23,7 +23,7 @@ export function useTableScroll(
   const debounceRedoHeight = useDebounceFn(redoHeight, 100);
 
   const getCanResize = computed(() => {
-    const {canResize, scroll} = unref(propsRef);
+    const { canResize, scroll } = unref(propsRef);
     return canResize && !(scroll || {}).y;
   });
 
@@ -55,7 +55,7 @@ export function useTableScroll(
   let bodyEl: HTMLElement | null;
 
   async function calcTableHeight() {
-    const {resizeHeightOffset, pagination, maxHeight, minHeight} = unref(propsRef);
+    const { resizeHeightOffset, pagination, maxHeight, minHeight } = unref(propsRef);
     const tableData = unref(getDataSourceRef);
 
     const table = unref(tableElRef);
@@ -98,7 +98,7 @@ export function useTableScroll(
     if (!headEl) return;
 
     // Table height from bottom
-    const {bottomIncludeBody} = getViewportOffset(headEl);
+    const { bottomIncludeBody } = getViewportOffset(headEl);
     // Table height from bottom height-custom offset
 
     const paddingHeight = 32;
@@ -176,7 +176,7 @@ export function useTableScroll(
 
   const getScrollRef = computed(() => {
     const tableHeight = unref(tableHeightRef);
-    const {canResize, scroll} = unref(propsRef);
+    const { canResize, scroll } = unref(propsRef);
     return {
       x: unref(getScrollX),
       y: canResize ? tableHeight : null,
@@ -185,5 +185,5 @@ export function useTableScroll(
     };
   });
 
-  return {getScrollRef, redoHeight};
+  return { getScrollRef, redoHeight };
 }

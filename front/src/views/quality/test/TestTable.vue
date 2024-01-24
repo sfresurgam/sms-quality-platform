@@ -11,14 +11,22 @@
 <script lang="ts" setup>
 import {ActionItem,  BasicTable, TableAction} from '/@/components/Table';
 import {useListPage} from '/@/hooks/system/useListPage';
-import {getTableColumns} from "/@/views/quality/heatReport/tableData";
-import {list} from "/@/views/quality/slabReport/api";
+import {roleList} from "/@/views/quality/test/TestApi";
 
 const {tableContext} = useListPage({
   tableProps: {
     title: '板坯生产列表',
-    api: () => list(1, 10, {}).then(res => res.data),
-    columns: getTableColumns(),
+    api: roleList,
+    columns: [
+      {
+        title: '角色名',
+        dataIndex: 'roleName'
+      },
+      {
+        title: '角色编码',
+        dataIndex: 'roleCode'
+      },
+    ],
     size: 'small',
     useSearchForm: false,
   },

@@ -109,11 +109,13 @@ export const downloadFile = (url, fileName?, parameter?) => {
       message.warning('文件下载失败');
       return;
     }
+    // @ts-ignore
     if (typeof window.navigator.msSaveBlob !== 'undefined') {
+      // @ts-ignore
       window.navigator.msSaveBlob(new Blob([data]), fileName);
     } else {
-      let url = window.URL.createObjectURL(new Blob([data]));
-      let link = document.createElement('a');
+      const url = window.URL.createObjectURL(new Blob([data]));
+      const link = document.createElement('a');
       link.style.display = 'none';
       link.href = url;
       link.setAttribute('download', fileName);
