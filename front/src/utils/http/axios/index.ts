@@ -91,9 +91,6 @@ const transform: AxiosTransform = {
   // 请求之前处理config
   beforeRequestHook: (config, options) => {
 
-    console.log('1 - url: ' + JSON.stringify(config.url))
-    console.log('1 - params: ' + JSON.stringify(config.params))
-
     const { apiUrl, joinPrefix, joinParamsToUrl, formatDate, joinTime = true, urlPrefix } = options;
 
     if (joinPrefix) {
