@@ -1,11 +1,11 @@
 import {list} from '/@/views/quality/slabReport/api';
-import {computed, ref, reactive, onMounted, nextTick} from 'vue';
+import {ref, reactive, onMounted, nextTick, watch, computed} from 'vue';
 
 export default function useTable() {
   // 表格高度
   const tableHeight = ref(0);
 
-  const tableList = reactive({
+  const tableData = reactive({
     list: [],
   })
 
@@ -19,15 +19,12 @@ export default function useTable() {
     showSizeChanger: true,
     pageSizeOptions: ['10', '20', '30', '50'],
     showTotal: (total: number) => `共有${total}条数据`,
-    // 页容量改变时触发
-    // @ts-ignore
-    onShowSizeChange: (current: number, pageSize: number) => {
-      // 实现逻辑
-    },
-    // 页数改变时触发
-    // @ts-ignore
     onChange: (current: number, pageSize: number) => {
-      // 实现逻辑
+      listParm.current = current;
+      listParm.size = pageSize;
+      slabPage.current = current;
+      slabPage.pageSize = pageSize;
+      getListApi().then();
     },
   });
 
@@ -42,50 +39,104 @@ export default function useTable() {
 
   const getListApi = async () => {
     const res = await list(listParm);
-    tableList.list = res.records;
+    tableData.list = res.records;
     slabPage.total = res.total;
+    if (tableData.list.length > 0) {
+      defaultSelectedKey.value = tableData.list[0].id;
+      selectedRowKeys.value = [defaultSelectedKey.value];
+    }
   }
+
 
   const columns = [
     {
+      title: '序号',
+      dataIndex: 'index',
+      customRender: ({ index }: { index: number }) => {
+        return `${index + 1}`
+      },
+      align: "center",
+      width: 50,
+    },
+    {
       title: '板坯生成时间',
       dataIndex: 'dataTime',
-
+      align: "center",
+      width: 120,
     },
     {
       title: '板坯号',
       dataIndex: 'slabNo',
+      align: "center",
+      width: 120,
     },
     {
       title: '炉次号',
       dataIndex: 'heatMatchNo',
+      align: "center",
+      width: 100,
+    },
+    {
+      title: '炉订号',
+      dataIndex: 'lgOrderId',
+      align: "center",
+      width: 100,
     },
     {
       title: '钢种',
       dataIndex: 'spec',
+      align: "center",
+      width: 75,
     },
     {
       title: '混钢坯标志',
       dataIndex: 'slabPlaceCode',
+      align: "center",
+      width: 75,
     },
   ]
+
+  const onSelectChange = (selectedKeys) => {
+    selectedRowKeys.value = selectedKeys;
+  };
+
+  const rowSelection = computed(() => ({
+    type: 'radio',
+    selectedRowKeys: selectedRowKeys.value,
+    onChange: onSelectChange,
+    hideDefaultSelections: true,
+  }));
+
+  const defaultSelectedKey = ref();
+
+  const selectedRowKeys = ref([defaultSelectedKey.value]);
+
+  watch(
+    () => tableData,
+    () => {
+      nextTick(() => {
+        selectedRowKeys.value = [defaultSelectedKey.value];
+      });
+    },
+    {immediate: true}
+  );
 
   onMounted(() => {
     nextTick(() => {
       // 获取表格数据
-      getListApi();
+      getListApi().then();
       // 计算表格高度
-      tableHeight.value = window.innerHeight - 300;
-    })
+      tableHeight.value = window.innerHeight - 550;
+    }).then()
   })
-
 
   return {
     tableHeight,
-    tableList,
+    tableData,
     tableSize,
     slabPage,
     listParm,
     columns,
+    rowSelection,
   }
 }
