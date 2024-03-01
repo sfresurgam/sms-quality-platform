@@ -6,7 +6,7 @@
   import { useECharts } from '/@/hooks/web/useECharts';
   import { cloneDeep } from 'lodash-es';
   export default defineComponent({
-    name: 'bar',
+    name: 'Bar',
     props: {
       chartData: {
         type: Array,
@@ -27,7 +27,7 @@
     },
     setup(props) {
       const chartRef = ref<HTMLDivElement | null>(null);
-      const { setOptions, echarts } = useECharts(chartRef as Ref<HTMLDivElement>);
+      const { setOptions } = useECharts(chartRef as Ref<HTMLDivElement>);
       const option = reactive({
         tooltip: {
           trigger: 'axis',

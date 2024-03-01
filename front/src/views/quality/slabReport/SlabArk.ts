@@ -2,15 +2,10 @@ import {getSlabMeasureInfo, list} from '/@/views/quality/slabReport/api';
 import {computed, nextTick, reactive, ref, watch} from 'vue';
 import initChartData from "/@/views/quality/test/chartManager";
 
-export default function useTable() {
+export default function slabArk() {
   const tableHeight = ref(0);
-
-  const tableData = reactive({
-    list: [],
-  })
-
+  const tableData = reactive({list: []})
   const tableSize = 'small';
-
   const slabPage = reactive({
     current: 1,
     pageSize: 5,
@@ -35,7 +30,6 @@ export default function useTable() {
     staTime: '',
     endTime: '',
   })
-
 
   const firstRowData = ref(null);
   const getListApi = async () => {
@@ -65,6 +59,46 @@ export default function useTable() {
     slabJudgeInfo.value.overallPercentage = Number(((slabJudgeInfo.value.passedRulesCount / slabJudgeInfo.value.ruleCount) * 100).toFixed(2))
     await nextTick();
   }
+
+  const queryParams = {
+    'slabNo': '',
+    'key':
+      'trkCastLength,' +
+      'MoldLevel,MoldLevelSetpoint,' +
+      'StopperRodPos,StopperRodMin,StopperRodMax,' +
+      'moldLevelStdDev,' +
+      'trkCastSpeed,' +
+      'MsStPscActTemp,' +
+      'thick',
+    'duration': 1
+  };
+
+  const onSelectChange = async (selectedKeys) => {
+    selectedRowKeys.value = selectedKeys;
+    const selectedRow = tableData.list.find(row => row.id == selectedKeys);
+    queryParams.slabNo = selectedRow.slabNo;
+    await getSlabMeasureInfoApi(queryParams);
+  };
+
+  const rowSelection = computed(() => ({
+    type: 'radio',
+    selectedRowKeys: selectedRowKeys.value,
+    onChange: onSelectChange,
+    hideDefaultSelections: true,
+  }));
+
+  const defaultSelectedKey = ref();
+  const selectedRowKeys = ref([defaultSelectedKey.value]);
+
+  watch(
+    () => tableData,
+    () => {
+      nextTick(() => {
+        selectedRowKeys.value = [defaultSelectedKey.value];
+      }).then();
+    },
+    {immediate: true}
+  );
 
   const columns = [
     {
@@ -113,61 +147,6 @@ export default function useTable() {
       width: 75,
     },
   ]
-
-  const {
-    renderChart1,
-    renderChart2,
-    renderChart3,
-    renderChart4,
-    renderChart5,
-    renderChart6
-  } = initChartData()
-
-  const queryParams = {
-    'slabNo': '',
-    'key':
-      'trkCastLength,' +
-      'MoldLevel,MoldLevelSetpoint,' +
-      'StopperRodPos,StopperRodMin,StopperRodMax,' +
-      'moldLevelStdDev,' +
-      'trkCastSpeed,' +
-      'MsStPscActTemp,' +
-      'thick',
-    'duration': 1
-  };
-
-  const onSelectChange = async (selectedKeys) => {
-    selectedRowKeys.value = selectedKeys;
-    const selectedRow = tableData.list.find(row => row.id == selectedKeys);
-    queryParams.slabNo = selectedRow.slabNo;
-    await getSlabMeasureInfoApi(queryParams);
-    renderChart1(slabMeasureInfo.value.obj, 'chart1');
-    renderChart2(slabMeasureInfo.value.obj, 'chart2');
-    renderChart3(slabMeasureInfo.value.obj, 'chart3');
-    renderChart4(slabMeasureInfo.value.obj, 'chart4');
-    renderChart5(slabMeasureInfo.value.obj, 'chart5');
-    renderChart6(slabMeasureInfo.value.obj, 'chart6');
-  };
-
-  const rowSelection = computed(() => ({
-    type: 'radio',
-    selectedRowKeys: selectedRowKeys.value,
-    onChange: onSelectChange,
-    hideDefaultSelections: true,
-  }));
-
-  const defaultSelectedKey = ref();
-  const selectedRowKeys = ref([defaultSelectedKey.value]);
-
-  watch(
-    () => tableData,
-    () => {
-      nextTick(() => {
-        selectedRowKeys.value = [defaultSelectedKey.value];
-      }).then();
-    },
-    {immediate: true}
-  );
 
   return {
     tableHeight,

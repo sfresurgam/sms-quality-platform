@@ -2,7 +2,6 @@ import {list} from '/@/views/quality/slabReport/api';
 import {ref, reactive, onMounted, nextTick, watch, computed} from 'vue';
 
 export default function useTable() {
-  // 表格高度
   const tableHeight = ref(0);
 
   const tableData = reactive({
@@ -11,7 +10,6 @@ export default function useTable() {
 
   const tableSize = 'small';
 
-  // 分页
   const slabPage = reactive({
     current: 1,
     pageSize: 10,
@@ -37,22 +35,24 @@ export default function useTable() {
     endTime: '',
   })
 
+
+  const firstRowData = ref(null);
   const getListApi = async () => {
     const res = await list(listParm);
     tableData.list = res.records;
     slabPage.total = res.total;
     if (tableData.list.length > 0) {
+      firstRowData.value = tableData.list[0];
       defaultSelectedKey.value = tableData.list[0].id;
       selectedRowKeys.value = [defaultSelectedKey.value];
     }
   }
 
-
   const columns = [
     {
       title: '序号',
       dataIndex: 'index',
-      customRender: ({ index }: { index: number }) => {
+      customRender: ({index}: { index: number }) => {
         return `${index + 1}`
       },
       align: "center",
@@ -116,17 +116,15 @@ export default function useTable() {
     () => {
       nextTick(() => {
         selectedRowKeys.value = [defaultSelectedKey.value];
-      });
+      }).then();
     },
     {immediate: true}
   );
 
   onMounted(() => {
     nextTick(() => {
-      // 获取表格数据
       getListApi().then();
-      // 计算表格高度
-      tableHeight.value = window.innerHeight - 550;
+      tableHeight.value = window.innerHeight;
     }).then()
   })
 
@@ -138,5 +136,6 @@ export default function useTable() {
     listParm,
     columns,
     rowSelection,
+    firstRowData,
   }
 }
