@@ -1,6 +1,6 @@
-import {getSlabMeasureInfo, list} from '/@/views/quality/slabReport/api';
+import {getSlabMeasureInfo, list, listChartConfig} from '/@/views/quality/slabReport/api';
 import {computed, nextTick, reactive, ref, watch} from 'vue';
-import initChartData from "/@/views/quality/test/chartManager";
+import initChartData from '/@/views/quality/slabReport/ChartManager'
 
 export default function slabArk() {
   const tableHeight = ref(0);
@@ -31,17 +31,32 @@ export default function slabArk() {
     endTime: '',
   })
 
-  const firstRowData = ref(null);
+  const currentRowData = ref(null);
   const getListApi = async () => {
     const res = await list(listParm);
     tableData.list = res.records;
     slabPage.total = res.total;
     if (tableData.list.length > 0) {
-      firstRowData.value = tableData.list[0];
+      currentRowData.value = tableData.list[0];
       defaultSelectedKey.value = tableData.list[0].id;
       selectedRowKeys.value = [defaultSelectedKey.value];
     }
     await nextTick();
+  }
+
+  const chartList = ref(null);
+  const activeTabKey = ref(null);
+  const getChartConfigTabList = async () => {
+    const res = await listChartConfig(null);
+    chartList.value = res.reduce((acc, chartItem) => {
+      if (!acc.hasOwnProperty(chartItem.tabName)) {
+        acc[chartItem.tabName] = [];
+      }
+      acc[chartItem.tabName].push(chartItem);
+
+      return acc;
+    }, {});
+    activeTabKey.value = Object.keys(chartList.value)[0]
   }
 
   const slabMeasureInfo = ref(null);
@@ -73,12 +88,26 @@ export default function slabArk() {
     'duration': 1
   };
 
+  const {
+    generateChartQueryParams,
+    renderChart,
+  } = initChartData()
+
+
   const onSelectChange = async (selectedKeys) => {
     selectedRowKeys.value = selectedKeys;
-    const selectedRow = tableData.list.find(row => row.id == selectedKeys);
-    queryParams.slabNo = selectedRow.slabNo;
-    await getSlabMeasureInfoApi(queryParams);
+    currentRowData.value = tableData.list.find(row => row.id == selectedKeys);
+    await getMeasureInfoAndRenderChart(chartList.value[activeTabKey.value], currentRowData.value.slabNo);
   };
+
+  const getMeasureInfoAndRenderChart = async(charts, slabNo) => {
+    const params = generateChartQueryParams(charts, slabNo);
+    await getSlabMeasureInfoApi(params);
+    console.log('data: ', JSON.stringify(slabMeasureInfo))
+    charts.forEach(chart => {
+      renderChart(chart, slabMeasureInfo.value.obj, `chart-${chart.id}`);
+    });
+  }
 
   const rowSelection = computed(() => ({
     type: 'radio',
@@ -156,11 +185,16 @@ export default function slabArk() {
     listParm,
     columns,
     rowSelection,
-    firstRowData,
+    currentRowData,
     getListApi,
     queryParams,
     getSlabMeasureInfoApi,
     slabMeasureInfo,
-    slabJudgeInfo
+    slabJudgeInfo,
+
+    getChartConfigTabList,
+    chartList,
+    activeTabKey,
+    getMeasureInfoAndRenderChart,
   }
 }

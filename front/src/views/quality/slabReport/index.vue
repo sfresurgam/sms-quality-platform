@@ -71,35 +71,20 @@
     </Col>
   </Row>
   <div style="padding: 10px">
-    <a-tabs class="chartTabs" v-model:activeKey="activeKey">
-      <a-tab-pane key="1" tab="MoldLevel">
-        <Row class="chartAreaStyle">
-          <Col :span="12">
-            <div class="chartWrapper">
-              <div id='chart1' class="chartStyle"></div>
-            </div>
-          </Col>
-          <Col :span="12">
-            <div class="chartWrapper">
-              <div id='chart2' class="chartStyle"></div>
-            </div>
-          </Col>
-        </Row>
-        <Row class="chartAreaStyle">
-          <Col :span="12">
-            <div class="chartWrapper">
-              <div id='chart5' class="chartStyle"></div>
-            </div>
-          </Col>
-          <Col :span="12">
-            <div class="chartWrapper">
-              <div id='chart6' class="chartStyle"></div>
-            </div>
-          </Col>
-        </Row>
+    <a-tabs class="chartTabs" v-model:activeKey="activeTabKey">
+      <a-tab-pane
+        v-for="(charts, tabName) in chartList" :key="tabName" :tab="tabName">
+        <template v-if="activeTabKey === tabName">
+          <Row class="chartAreaStyle" v-for="(row, rowIndex) in organizeCharts(charts)"
+               :key="`row-${tabName}-${rowIndex}`">
+            <Col :span="chart.chartSpan" v-for="(chart) in row" :key="`chart-${chart.id}`">
+              <div class="chartWrapper" v-if="activeTabKey === tabName">
+                <div :id="`chart-${chart.id}`" class="chartStyle"></div>
+              </div>
+            </Col>
+          </Row>
+        </template>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="Basic">Content of Tab Pane 2</a-tab-pane>
-      <a-tab-pane key="3" tab="MMS">Content of Tab Pane 3</a-tab-pane>
     </a-tabs>
   </div>
 
@@ -115,8 +100,8 @@ import {
 } from '@ant-design/icons-vue';
 import {Row, Col} from 'ant-design-vue';
 import * as echarts from "echarts";
+import initChartData from "/@/views/quality/slabReport/ChartManager";
 
-const activeKey = ref('1');
 const {
   tableHeight,
   tableData,
@@ -125,26 +110,57 @@ const {
   listParm,
   columns,
   rowSelection,
-  firstRowData,
+  currentRowData,
   getListApi,
   queryParams,
   getSlabMeasureInfoApi,
   slabMeasureInfo,
   slabJudgeInfo,
+
+  getChartConfigTabList,
+  chartList,
+  activeTabKey,
+
+  getMeasureInfoAndRenderChart,
 } = slabArk();
 
-onMounted(() => {
-  nextTick(() => {
-    getListApi().then();
-    tableHeight.value = window.innerHeight;
-  }).then()
-  watch(firstRowData, async (sourceValue) => {
-    if (sourceValue) {
-      queryParams.slabNo = sourceValue.slabNo;
-      await getSlabMeasureInfoApi(queryParams).then();
+const {
+  generateChartQueryParams,
+} = initChartData()
+
+onMounted(async () => {
+  await nextTick();
+  await getListApi();
+  await getChartConfigTabList();
+  tableHeight.value = window.innerHeight;
+});
+
+watch(activeTabKey, async (newTabKey) => {
+  if (typeof newTabKey === 'string' && newTabKey) {
+    const charts = chartList.value[newTabKey];
+    await getMeasureInfoAndRenderChart(chartList.value[newTabKey], currentRowData.value.slabNo);
+  }
+});
+
+function organizeCharts(charts) {
+  let rows = [];
+  let currentRow = [];
+  let currentSpanTotal = 0;
+  charts.forEach(chart => {
+    if (currentSpanTotal + parseInt(chart.chartSpan) <= 24) {
+      currentRow.push(chart);
+      currentSpanTotal += parseInt(chart.chartSpan);
+    } else {
+      rows.push(currentRow);
+      currentRow = [chart];
+      currentSpanTotal = parseInt(chart.chartSpan);
     }
-  })
-})
+  });
+  if (currentRow.length > 0) {
+    rows.push(currentRow);
+  }
+  return rows;
+}
 
 
 </script>
