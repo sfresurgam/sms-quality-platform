@@ -1,4 +1,5 @@
-import {getSlabMeasureInfo, list, listChartConfig} from '/@/views/quality/slabReport/api';
+import {getSlabMeasureInfo, list as slabReportList} from '/@/views/quality/slabReport/api';
+import {list as chartConfigList} from '/@/views/quality/chartConfig/api';
 import {computed, nextTick, reactive, ref, watch} from 'vue';
 import initChartData from '/@/views/quality/slabReport/ChartManager'
 
@@ -33,7 +34,7 @@ export default function slabArk() {
 
   const currentRowData = ref(null);
   const getListApi = async () => {
-    const res = await list(listParm);
+    const res = await slabReportList(listParm);
     tableData.list = res.records;
     slabPage.total = res.total;
     if (tableData.list.length > 0) {
@@ -47,7 +48,7 @@ export default function slabArk() {
   const chartList = ref(null);
   const activeTabKey = ref(null);
   const getChartConfigTabList = async () => {
-    const res = await listChartConfig(null);
+    const res = await chartConfigList(null);
     chartList.value = res.reduce((acc, chartItem) => {
       if (!acc.hasOwnProperty(chartItem.tabName)) {
         acc[chartItem.tabName] = [];
@@ -103,7 +104,6 @@ export default function slabArk() {
   const getMeasureInfoAndRenderChart = async(charts, slabNo) => {
     const params = generateChartQueryParams(charts, slabNo);
     await getSlabMeasureInfoApi(params);
-    console.log('data: ', JSON.stringify(slabMeasureInfo))
     charts.forEach(chart => {
       renderChart(chart, slabMeasureInfo.value.obj, `chart-${chart.id}`);
     });
